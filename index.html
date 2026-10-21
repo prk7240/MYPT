@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나의 책상 포트폴리오</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Gowun Batang"', 'serif'],
+            sans: ['"Noto Sans KR"', 'sans-serif'],
+          },
+          colors: {
+            wood: {
+              light: '#e0c097',
+              DEFAULT: '#8b5a2b',
+              dark: '#5c3a17',
+              desk: '#2c1d11'
+            },
+            paper: '#fdfbf7',
+            book: {
+              red: '#8b263e',
+              blue: '#2b4c7e',
+              green: '#2d5a27',
+              amber: '#b87d2b',
+              purple: '#5a3d7c'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #1a1614;
+      color: #333;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Cozy Room Lighting Effect */
+    .room-bg {
+      background: radial-gradient(circle at 50% 30%, #3a2c23 0%, #1a1410 70%, #0d0a08 100%);
+    }
+
+    /* Wood Desk Surface */
+    .desk-surface {
+      background: linear-gradient(180deg, #422a18 0%, #2a1a0e 40%, #180f08 100%);
+      box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.8), 0 -5px 25px rgba(0,0,0,0.5);
+    }
+
+    /* Shelf Effect */
+    .shelf {
+      background: linear-gradient(0deg, #3d2616, #5a3a22);
+      box-shadow: 0 15px 25px rgba(0,0,0,0.7), inset 0 2px 5px rgba(255,255,255,0.1);
+    }
+
+    /* 3D Perspective Container */
+    .perspective-1000 {
+      perspective: 1200px;
+    }
+
+    /* Book Hover & Animation Effects */
+    .book-item {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .book-item:hover {
+      transform: translateY(-15px) rotateY(-10deg) scale(1.05);
+      box-shadow: -15px 20px 30px rgba(0,0,0,0.6);
+    }
+
+    .book-cover {
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 5px 5px 15px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    /* Spine Accent */
+    .book-cover::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: -2px 0 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Modal Open Animation */
+    .opened-book-container {
+      perspective: 2000px;
+    }
+
+    /* Book Spread Effect */
+    .book-spread {
+      background: #fdfbf7;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+      position: relative;
+    }
+
+    /* Center Book Fold Shadow */
+    .book-spread::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 40px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, 
+        rgba(0,0,0,0.15) 0%, 
+        rgba(0,0,0,0.02) 40%, 
+        rgba(0,0,0,0.02) 60%, 
+        rgba(0,0,0,0.15) 100%);
+      pointer-events: none;
+    }
+
+    /* Page Turn Animation */
+    .page-turn-enter {
+      animation: pageTurnIn 0.4s ease-out forwards;
+    }
+
+    @keyframes pageTurnIn {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Floating Ambient Light Effect */
+    .lamp-glow {
+      background: radial-gradient(circle, rgba(255,220,150,0.15) 0%, rgba(255,220,150,0) 70%);
+      pointer-events: none;
+    }
+
+    /* Clickable Portfolio Image Hover Style */
+    .portfolio-img-preview {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .portfolio-img-preview:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen room-bg flex flex-col justify-between text-slate-100 overflow-y-auto">
+
+  <!-- Ambient Room Lamp Light -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 lamp-glow rounded-full z-0"></div>
+
+  <!-- Header / Desk Frame Section -->
+  <header class="relative z-10 pt-8 pb-4 px-4 flex flex-col items-center">
+    
+    <!-- Photo Frame / Desk Nameplate -->
+    <div class="relative bg-gradient-to-b from-[#8b5a2b] to-[#5c3a17] p-3 rounded-lg shadow-2xl border-2 border-[#a67c52] max-w-md w-full transition-transform hover:scale-105 duration-300">
+      
+      <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-6 border-t-2 border-slate-500/50 rounded-t-full"></div>
+      
+      <div class="bg-[#fdfbf7] text-slate-800 p-4 rounded border border-[#d4c3a3] shadow-inner flex items-center gap-4">
+        
+        <!-- Profile Image Container -->
+        <div class="relative group cursor-pointer">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-[#8b5a2b] shadow-md bg-slate-200 flex-shrink-0">
+            <img id="profile-img" src="MyProfile.png" alt="프로필 사진" class="w-full h-full object-cover">
+          </div>
+        </div>
+
+        <!-- User Info Text -->
+        <div class="flex-1">
+          <div class="flex items-center justify-between border-b border-amber-900/20 pb-1 mb-1.5">
+            <h1 id="user-name" class="font-serif font-bold text-xl sm:text-2xl text-[#3a2617]">박기량</h1>
+            <span class="text-xs px-2 py-0.5 bg-amber-800/10 text-amber-900 rounded font-serif">Portfolio</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 font-serif leading-relaxed">
+	<p style="font-size: 16px;">
+            안녕하세요. 취미로 게임개발을 하는 요리사 박기량입니다. 저의 이야기들을 언제든 읽어보세요.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="mt-2 text-center">
+        <span class="text-[10px] tracking-widest text-amber-200/80 uppercase font-serif">My Thoughtful Workspace</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Desk Area with Books -->
+  <main class="relative z-10 flex-1 flex flex-col justify-end pb-12 px-4 max-w-5xl mx-auto w-full">
+    
+    <div class="shelf rounded-t-lg p-6 sm:p-8 border-t border-amber-500/20 shadow-2xl">
+      
+      <div class="perspective-1000 flex flex-col gap-8 sm:gap-12">
+        
+        <!-- Top Row: 3 Books -->
+        <div class="flex flex-wrap justify-center items-end gap-6 sm:gap-12">
+          
+          <div onclick="openBook(0)" class="book-item group">
+            <div class="book-cover w-28 h-40 sm:w-36 sm:h-52 bg-book-red rounded-r-md p-4 flex flex-col justify-between text-amber-100 border-l-8 border-red-950">
+              <div class="text-right"><i class="fa-solid fa-user text-xs opacity-60"></i></div>
+              <div class="text-center font-serif py-2 border-y border-amber-200/30">
+                <span class="block text-xs text-amber-200/70 mb-1">Vol. 1</span>
+                <h2 class="font-bold text-base sm:text-lg tracking-wide">자기소개</h2>
+              </div>
+              <div class="text-xs text-center font-serif text-amber-200/60">About Me</div>
+            </div>
+            <div class="h-3 bg-black/60 rounded-full blur-sm mt-1 transform group-hover:scale-90 transition-transform"></div>
+          </div>
+
+          <div onclick="openBook(1)" class="book-item group">
+            <div class="book-cover w-28 h-40 sm:w-36 sm:h-52 bg-book-blue rounded-r-md p-4 flex flex-col justify-between text-blue-100 border-l-8 border-slate-950">
+              <div class="text-right"><i class="fa-solid fa-gamepad text-xs opacity-60"></i></div>
+              <div class="text-center font-serif py-2 border-y border-blue-200/30">
+                <span class="block text-xs text-blue-200/70 mb-1">Vol. 2</span>
+                <h2 class="font-bold text-base sm:text-lg tracking-wide">취미</h2>
+              </div>
+              <div class="text-xs text-center font-serif text-blue-200/60">Hobbies</div>
+            </div>
+            <div class="h-3 bg-black/60 rounded-full blur-sm mt-1 transform group-hover:scale-90 transition-transform"></div>
+          </div>
+
+          <div onclick="openBook(2)" class="book-item group">
+            <div class="book-cover w-28 h-40 sm:w-36 sm:h-52 bg-book-green rounded-r-md p-4 flex flex-col justify-between text-emerald-100 border-l-8 border-emerald-950">
+              <div class="text-right"><i class="fa-solid fa-laptop-code text-xs opacity-60"></i></div>
+              <div class="text-center font-serif py-2 border-y border-emerald-200/30">
+                <span class="block text-xs text-emerald-200/70 mb-1">Vol. 3</span>
+                <h2 class="font-bold text-base sm:text-lg tracking-wide">만든것들</h2>
+              </div>
+              <div class="text-xs text-center font-serif text-emerald-200/60">Projects</div>
+            </div>
+            <div class="h-3 bg-black/60 rounded-full blur-sm mt-1 transform group-hover:scale-90 transition-transform"></div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Row: 2 Books -->
+        <div class="flex flex-wrap justify-center items-end gap-6 sm:gap-12">
+          
+          <div onclick="openBook(3)" class="book-item group">
+            <div class="book-cover w-28 h-40 sm:w-36 sm:h-52 bg-book-amber rounded-r-md p-4 flex flex-col justify-between text-amber-950 border-l-8 border-amber-950">
+              <div class="text-right"><i class="fa-solid fa-bullseye text-xs opacity-60"></i></div>
+              <div class="text-center font-serif py-2 border-y border-amber-900/30">
+                <span class="block text-xs text-amber-900/70 mb-1">Vol. 4</span>
+                <h2 class="font-bold text-base sm:text-lg tracking-wide">달라진 점</h2>
+              </div>
+              <div class="text-xs text-center font-serif text-amber-900/60">Goals</div>
+            </div>
+            <div class="h-3 bg-black/60 rounded-full blur-sm mt-1 transform group-hover:scale-90 transition-transform"></div>
+          </div>
+
+          <div onclick="openBook(4)" class="book-item group">
+            <div class="book-cover w-28 h-40 sm:w-36 sm:h-52 bg-book-purple rounded-r-md p-4 flex flex-col justify-between text-purple-100 border-l-8 border-purple-950">
+              <div class="text-right"><i class="fa-solid fa-star text-xs opacity-60"></i></div>
+              <div class="text-center font-serif py-2 border-y border-purple-200/30">
+                <span class="block text-xs text-purple-200/70 mb-1">Vol. 5</span>
+                <h2 class="font-bold text-base sm:text-lg tracking-wide">이후 계획</h2>
+              </div>
+              <div class="text-xs text-center font-serif text-purple-200/60">Dreams</div>
+            </div>
+            <div class="h-3 bg-black/60 rounded-full blur-sm mt-1 transform group-hover:scale-90 transition-transform"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="desk-surface h-10 w-full rounded-b-lg border-t-2 border-amber-900/40"></div>
+  </main>
+
+  <footer class="text-center pb-6 text-xs text-amber-200/40 font-serif">
+    <p><i class="fa-regular fa-hand-pointer mr-1"></i> 책을 클릭하면 해당 카테고리의 포트폴리오 노트가 펼쳐집니다. 프로젝트 이미지를 클릭하면 게임/사이트가 실행됩니다!</p>
+  </footer>
+
+  <!-- Opened Book Overlay Modal -->
+  <div id="book-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-500">
+    
+    <div class="opened-book-container w-full max-w-4xl h-[85vh] max-h-[650px] flex flex-col relative">
+      
+      <div class="flex justify-between items-center mb-3 px-2">
+        <button onclick="closeBook()" class="bg-amber-100/90 hover:bg-white text-slate-800 font-serif px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm transition-all transform hover:-translate-y-0.5 border border-amber-200">
+          <i class="fa-solid fa-house text-amber-800"></i>
+          <span>홈으로 (책 덮기)</span>
+        </button>
+
+        <span id="modal-book-title" class="text-amber-100 font-serif font-bold text-lg hidden sm:block"></span>
+      </div>
+
+      <div class="book-spread flex-1 flex flex-col md:flex-row rounded-lg overflow-hidden border-4 border-[#3a2617] text-slate-800 font-serif relative shadow-2xl">
+        
+        <!-- Left Page -->
+        <div class="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-stone-300 relative bg-[#fdfbf7]">
+          
+          <div class="absolute top-4 left-4 text-xs text-slate-400 font-sans" id="left-page-header">CATEGORY</div>
+
+          <div id="left-page-content" class="my-auto pt-4 page-turn-enter"></div>
+
+          <div class="text-left text-xs text-slate-400 pt-4 border-t border-stone-200" id="left-page-num">
+            Page 1
+          </div>
+        </div>
+
+        <!-- Right Page -->
+        <div class="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-between relative bg-[#fcf9f2]">
+          
+          <div class="absolute top-4 right-4 text-xs text-slate-400 font-sans" id="right-page-header">PORTFOLIO NOTE</div>
+
+          <div id="right-page-content" class="my-auto pt-4 page-turn-enter"></div>
+
+          <div class="flex justify-between items-center pt-4 border-t border-stone-200">
+            <span class="text-xs text-slate-400" id="right-page-num">Page 2</span>
+            
+            <div class="flex items-center gap-2">
+              <button id="prev-btn" onclick="prevPage()" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-slate-700 text-xs rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-chevron-left mr-1"></i> 이전
+              </button>
+              
+              <span id="page-indicator" class="text-xs text-slate-500 font-sans px-2">1 / 2</span>
+
+              <button id="next-btn" onclick="nextPage()" class="px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white text-xs rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                다음 <i class="fa-solid fa-chevron-right ml-1"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- [NEW] Game / Site Execution Modal (축소 화면 팝업 뷰어) -->
+  <div id="game-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-slate-900 w-full max-w-5xl h-[85vh] rounded-xl border border-slate-700 shadow-2xl flex flex-col overflow-hidden">
+      <!-- Modal Top Bar -->
+      <div class="bg-slate-800 px-4 py-3 flex justify-between items-center border-b border-slate-700">
+        <div class="flex items-center gap-2 text-slate-200 font-sans font-bold text-sm">
+          <i class="fa-solid fa-gamepad text-emerald-400"></i>
+          <span id="game-modal-title">앱 게임 실행 화면</span>
+        </div>
+        <button onclick="closeGameModal()" class="text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-700/50 hover:bg-slate-700 text-xs transition-colors">
+          <i class="fa-solid fa-xmark text-base"></i> 닫기
+        </button>
+      </div>
+      <!-- Modal Body (iframe container for GitHub / Web App) -->
+      <div class="flex-1 bg-black relative">
+        <iframe id="game-iframe" src="" class="w-full h-full border-0"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Data & Logic -->
+  <script>
+    /* -------------------------------------------------------------
+       BOOK DATA STRUCTURE
+       프로젝트 이미지에 onclick="openGameModal('게임제목', '배포주소')" 를 연결
+    ------------------------------------------------------------- */
+    const booksData = [
+      // 0. 자기소개
+      {
+        title: "자기소개",
+        englishTitle: "About Me",
+        colorClass: "text-amber-900",
+        pages: [
+          {
+            left: `
+              <div class="text-center mb-6">
+                <div class="w-24 h-24 mx-auto rounded-full overflow-hidden border-2 border-amber-800 mb-3 shadow-md">
+                  <img src="MyProfile.png">
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">박기량</h3>
+                <p class="text-xs text-amber-800 mt-1 font-sans">Developer & Cook</p>
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed font-serif">
+		<p style="font-size: 20px;">
+                "행복한 음식을 추구하며 모두 즐거운 게임을 만드는 취미를 가진 요리사 박기량입니다."
+              </p>
+            `,
+            right: `
+              <h4 class="text-base font-bold text-slate-800 border-b border-amber-800/20 pb-2 mb-4">
+                <i class="fa-solid fa-address-card text-amber-800 mr-2"></i>기본 정보
+              </h4>
+              <ul class="space-y-3 text-sm text-slate-600 font-sans">
+                <li class="flex items-center gap-2"><strong class="w-16 text-slate-800">이메일:</strong> qkrrlfid7240@naver.com</li>
+                <li class="flex items-center gap-2"><strong class="w-16 text-slate-800">생년월일:</strong> 2001.01.16</li>
+                <li class="flex items-center gap-2"><strong class="w-16 text-slate-800">거주지:</strong> 제주특별자치도 제주시</li>
+              </ul>
+              <div class="mt-6">
+                <h5 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-sans">주요 스킬</h5>
+                <div class="flex flex-wrap gap-1.5 font-sans">
+                  <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs rounded-full">한식</span>
+                  <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs rounded-full">중식</span>
+                  <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs rounded-full">양식</span>
+                  <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs rounded-full">Unity</span>
+                  <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs rounded-full">Unreal</span>
+                  <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs rounded-full">Blender</span>
+                </div>
+              </div>
+            `
+          },
+          {
+            left: `
+              <h4 class="text-base font-bold text-slate-800 border-b border-amber-800/20 pb-2 mb-4">
+                <i class="fa-solid fa-graduation-cap text-amber-800 mr-2"></i>학력 및 이력
+              </h4>
+              <div class="space-y-4 text-xs sm:text-sm font-sans text-slate-600">
+                <div class="border-l-2 border-amber-800/40 pl-3">
+                  <div class="font-bold text-slate-800">제주한라대학교 컴퓨터정보과</div>
+                  <div class="text-slate-400 text-xs">2019.03 - 2024.02 졸업</div>
+                </div>
+                <div class="border-l-2 border-amber-800/40 pl-3">
+                  <div class="font-bold text-slate-800">청자날다</div>
+                  <div class="text-slate-400 text-xs">2026.02~</div>
+                </div>
+              </div>
+            `,
+            right: `
+              <h4 class="text-base font-bold text-slate-800 border-b border-amber-800/20 pb-2 mb-4">
+                <i class="fa-solid fa-heart text-amber-800 mr-2"></i>가치관
+              </h4>
+              <p class="text-sm text-slate-600 leading-relaxed font-serif mb-4">
+		<p style="font-size: 20px;">
+                요리와 게임을 만들때 즐거우면 그 결과물도 맛이좋고 재미있다고 믿습니다.항상 즐겁고 정성을 다하겟습니다.
+              </p>
+              <div class="bg-amber-50 p-3 rounded border border-amber-200/60 text-xs text-amber-900 italic font-serif">
+                "즐거움이 곧 행복이다"
+              </div>
+            `
+          }
+        ]
+      },
+
+      // 1. 취미
+      {
+        title: "취미",
+        englishTitle: "Hobbies",
+        colorClass: "text-blue-900",
+        pages: [
+          {
+            left: `
+              <div class="text-center mb-4">
+                <h1 class="text-lg font-bold text-slate-800"><p style="font-size: 26px;">게임 개발</p></h3>
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed font-serif">
+		<p style="font-size: 20px;">
+                아이디어가 생기거나 만들고 싶은게 있으면 직접 만들어 봅니다.장르 불문 게임 전부 좋아합니다.
+              </p>
+            `,
+            right: `
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <img src="SD.png" class="portfolio-img-preview rounded" onclick="openGameModal('양의꿈', 'https://prk7240.github.io/SD/')">
+                <img src="ApocalypseTrader.png" class="portfolio-img-preview rounded" onclick="openGameModal('ApocalypseTrader', 'https://prk7240.github.io/APTR/')">
+              </div>
+              <h4 class="text-xs font-bold text-slate-700 font-sans mb-1"><p style="font-size: 26px;">좋아하는 장르</p></h5>
+              <p class="text-xs text-slate-500 font-sans"><p style="font-size: 20px;">플랫폼어, RPG, 공포스릴러</p>
+            `
+          },
+          {
+            left: `
+              <div class="text-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800"><p style="font-size: 26px;">관심이 가는 게임 기술</p></h3>
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed font-serif"><p style="font-size: 20px;">
+                여러 유형의 게임들을 보며 흥미가 가는 기술들에 대한 생각을 짧게 남깁니다.
+              </p>
+            `,
+            right: `
+              <h1 class="text-sm font-bold text-slate-800 border-b border-blue-800/20 pb-2 mb-3"><p style="font-size: 26px;">최근 관심이 가는 게임</p></h4>
+              <ul class="space-y-2 text-xs text-slate-600 font-serif">
+                <li><p style="font-size: 20px;">• GTA6 - RockstarGames</p></li>
+                <li><p style="font-size: 20px;">• 80억분의 1</p></li>
+              </ul>
+            `
+          }
+        ]
+      },
+
+      // 2. 만든것들 (Projects) -> 이미지를 클릭하면 깃허브 배포 주소/게임 화면이 축소 모달로 실행됨
+      {
+        title: "만든것들",
+        englishTitle: "Projects",
+        colorClass: "text-emerald-900",
+        pages: [
+          {
+            left: `
+              <span class="inline-block px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-sans rounded mb-2">Project 01</span>
+              <h3 class="text-lg font-bold text-slate-800 mb-2"><p style="font-size: 26px;">중력 변환 턴 큐브 게임</p></h3>
+              <p class="text-xs text-slate-600 leading-relaxed font-serif mb-4"><p style="font-size: 20px;">
+                기본적인 플랫폼어 형태에 중력의 방향을 바꾼다는 발상을 기반으로 제작한 큐브 탈출 프로젝트입니다.
+              </p>
+              <div class="flex flex-wrap gap-1 font-sans">
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">HTML/CSS</span>
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">Javascript</span>
+              </div>
+            `,
+            right: `
+              <div class="rounded border border-stone-200 overflow-hidden mb-3 shadow-sm portfolio-img-preview" onclick="openGameModal('중력 변환 턴 큐브 프로젝트', 'https://prk7240.github.io/TurnCube/')">
+                <img src="TurnCube.png" alt="TurnCube">
+                <div class="bg-emerald-800 text-white text-[10px] text-center py-1 font-sans"><i class="fa-solid fa-play mr-1"></i> 클릭하여 게임 실행하기</div>
+              </div>
+              <div class="text-xs text-slate-600 space-y-1 font-sans">
+                <p style="font-size: 20px;"><strong>주요 기능:</strong> Turn 기능을 통해 중력 방향 변환<br><br> 및 물리 규칙 변경</p>
+              </div>
+            `
+          },
+          {
+            left: `
+              <span class="inline-block px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-sans rounded mb-2">Project 02</span>
+              <h3 class="text-lg font-bold text-slate-800 mb-2"><p style="font-size: 26px;">아포칼립스 상인 프로젝트</p></h3>
+              <p class="text-xs text-slate-600 leading-relaxed font-serif mb-4"><p style="font-size: 20px;">
+                아포칼립스 쉘터의 주인이 되어 방랑자들과의 거래를 통한 생존 프로젝트입니다.
+              </p>
+              <div class="flex flex-wrap gap-1 font-sans">
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">HTML/CSS</span>
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">Javascript</span>
+              </div>
+            `,
+            right: `
+              <div class="rounded border border-stone-200 overflow-hidden mb-3 shadow-sm portfolio-img-preview" onclick="openGameModal('아포칼립스 상인', 'https://prk7240.github.io/APTR/')">
+                <img src="ApocalypseTrader.png" alt="ApocalypseTrader">
+                <div class="bg-emerald-800 text-white text-[10px] text-center py-1 font-sans"><i class="fa-solid fa-play mr-1"></i> 클릭하여 게임 실행하기</div>
+              </div>
+              <p class="text-xs text-slate-600 font-sans"><p style="font-size: 20px;">
+                자원을 관리하고 거래를 통해 아이템을<br> 획득하는 생존 전략 프로젝트입니다.
+              </p>
+            `
+          }
+        ]
+      },
+
+      // 3. 목표
+      {
+        title: "달리진점",
+        englishTitle: "Goals",
+        colorClass: "text-amber-900",
+        pages: [
+          {
+            left: `
+              <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-amber-900/20 pb-2">
+                <i class="fa-solid fa-flag text-amber-700 mr-2"></i><p style="font-size: 26px;">이전</p>
+              </h3>
+              <ul class="space-y-3 text-xs sm:text-sm text-slate-600 font-sans">
+                <li class="flex items-start gap-2">
+                  <span><p style="font-size: 20px;">html에 대하여 잘 알지 못하고 미숙함</p></span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span><p style="font-size: 20px;">웹게임에 대한 지식이 많지 않음</p></span>
+                </li>
+              </ul>
+            `,
+            right: `
+              <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-amber-900/20 pb-2">
+                <i class="fa-solid fa-mountain text-amber-700 mr-2"></i><p style="font-size: 26px;">이후 의모습</p>
+              </h3>
+              <div class="space-y-3 text-xs sm:text-sm text-slate-600 font-serif leading-relaxed">
+                <p style="font-size: 20px;"><strong>AI를 활용하여 간단한 웹게임 제작 가능</p>
+		</li>
+                <li class="flex items-start gap-2">
+                  <span><p style="font-size: 20px;">AI를 통해 계산해야하는 webgl을 AI에게 맡기고 설계를 통한 3d웹 게임 제작</p></span>
+              </div>
+            `
+          }
+        ]
+      },
+
+      // 4. 이후 AI활용 계획
+      {
+        title: "계획",
+        englishTitle: "Dreams",
+        colorClass: "text-purple-900",
+        pages: [
+          {
+            left: `
+              <div class="text-center my-4">
+                <i class="fa-solid fa-wand-magic-sparkles text-4xl text-purple-700 mb-3"></i>
+                <h3 class="text-xl font-bold text-slate-800"><p style="font-size: 26px;">이후 나의 계획</p></h3>
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed font-serif text-center"><p style="font-size: 20px;">
+                AI를 활용하여 각종 음식제작 시뮬레이터 및 레스토랑 운영게임 제작              </p>
+            `,
+            right: `
+              <h4 class="text-sm font-bold text-slate-800 border-b border-purple-800/20 pb-2 mb-3"><p style="font-size: 26px;">미래를 향한 여정</p></h4>
+              <p class="text-xs text-slate-600 leading-relaxed font-serif mb-4"><p style="font-size: 20px;">
+                앞으로 발전하는 AI를 통해 glss5 기술처럼 AI렌더링을 활용해 게임 내의 음식을 좀더 현실적으로 표현하여 즐겁고 재미있고 실감나는 게임을 연구              </p>
+            `
+          }
+        ]
+      }
+    ];
+
+    /* -------------------------------------------------------------
+       MODAL & INTERACTION STATE LOGIC
+    ------------------------------------------------------------- */
+    let currentBookIndex = 0;
+    let currentPageIndex = 0;
+
+    const modal = document.getElementById('book-modal');
+    const leftContent = document.getElementById('left-page-content');
+    const rightContent = document.getElementById('right-page-content');
+    const leftPageNum = document.getElementById('left-page-num');
+    const rightPageNum = document.getElementById('right-page-num');
+    const pageIndicator = document.getElementById('page-indicator');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const bookTitleElem = document.getElementById('modal-book-title');
+
+    // 게임/사이트 축소 실행 모달 관련 요소
+    const gameModal = document.getElementById('game-modal');
+    const gameIframe = document.getElementById('game-iframe');
+    const gameModalTitle = document.getElementById('game-modal-title');
+
+    function openBook(index) {
+      currentBookIndex = index;
+      currentPageIndex = 0;
+      
+      const book = booksData[index];
+      bookTitleElem.innerText = `[${book.title}] - ${book.englishTitle}`;
+      
+      renderPages();
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
+    }
+
+    function closeBook() {
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function renderPages() {
+      const book = booksData[currentBookIndex];
+      const pageData = book.pages[currentPageIndex];
+      const totalPages = book.pages.length;
+
+      leftContent.classList.remove('page-turn-enter');
+      rightContent.classList.remove('page-turn-enter');
+      void leftContent.offsetWidth; 
+      leftContent.classList.add('page-turn-enter');
+      rightContent.classList.add('page-turn-enter');
+
+      leftContent.innerHTML = pageData.left;
+      rightContent.innerHTML = pageData.right;
+
+      const leftNum = (currentPageIndex * 2) + 1;
+      const rightNum = (currentPageIndex * 2) + 2;
+      leftPageNum.innerText = `Page ${leftNum}`;
+      rightPageNum.innerText = `Page ${rightNum}`;
+
+      pageIndicator.innerText = `${currentPageIndex + 1} / ${totalPages}`;
+
+      prevBtn.disabled = currentPageIndex === 0;
+      nextBtn.disabled = currentPageIndex === totalPages - 1;
+    }
+
+    function nextPage() {
+      const book = booksData[currentBookIndex];
+      if (currentPageIndex < book.pages.length - 1) {
+        currentPageIndex++;
+        renderPages();
+      }
+    }
+
+    function prevPage() {
+      if (currentPageIndex > 0) {
+        currentPageIndex--;
+        renderPages();
+      }
+    }
+
+    // [NEW] 깃허브 배포 주소 및 앱 게임 화면을 축소 모달로 띄우는 함수
+    function openGameModal(title, url) {
+      gameModalTitle.innerText = title;
+      gameIframe.src = url; // 깃허브 페이지 주소 (예: https://아이디.github.io/레포이름)
+      
+      gameModal.classList.remove('opacity-0', 'pointer-events-none');
+      gameModal.classList.add('opacity-100', 'pointer-events-auto');
+    }
+
+    // [NEW] 게임 모달 닫기
+    function closeGameModal() {
+      gameModal.classList.remove('opacity-100', 'pointer-events-auto');
+      gameModal.classList.add('opacity-0', 'pointer-events-none');
+      gameIframe.src = ""; // 메모리 절약을 위해 iframe 주소 비우기
+    }
+
+    // Keyboard Shortcuts (Arrow Keys & ESC)
+    document.addEventListener('keydown', (e) => {
+      if (gameModal.classList.contains('opacity-100')) {
+        if (e.key === 'Escape') closeGameModal();
+        return;
+      }
+
+      if (!modal.classList.contains('opacity-100')) return;
+
+      if (e.key === 'Escape') closeBook();
+      if (e.key === 'ArrowRight') nextPage();
+      if (e.key === 'ArrowLeft') prevPage();
+    });
+  </script>
+
+</body>
+</html>
